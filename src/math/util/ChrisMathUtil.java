@@ -281,5 +281,70 @@ public final class ChrisMathUtil {
 	}
 	private static int[][] dpArr; // 동적 프로그래밍 
 	
+
+	
+
+	/**
+	 * 이항계수 nCr 을 div로 나눈 나머지 값을 구한다.
+	 * 
+	 * ( n! / ((n-r)!(r!)) )%div 
+	 * = ( n! *  ( ((n-r)!(r!)))^(-1) )%div // ↓곱분배법칙적용
+	 * = ( ( n!%div )  *  (( (n-r)!(r!) )^(-1) )%div ) %div // ↓페르마의 소정리
+	 * = ( ( n!%div )  *  (( (n-r)!(r!) )^(div-2) )%div ) %div
+	 * 
+	 * @param n
+	 * @param r
+	 * @param div 
+	 * @return
+	 */
+	public static int binomialWithMod(int n , int r, int div) {
+		int[] dpFactorial = new int[n+1];
+		return (factorialWithMod(n,div, dpFactorial) * expWithMod( factorialWithMod(n-r, div, dpFactorial) * factorialWithMod(r, div, dpFactorial) , div-2 , div))%div ; 
+	}
+
+	/**
+	 * (base)^(exp) 를 div 로 나눈 나머지 를 구한다.
+	 * 분할정복과 나머지연산 곱 분배법칙을 이용하여 계산을 최소화 
+	 * a^(2n) = a^n a^n 
+	 * @param base
+	 * @param exp
+	 * @param div
+	 * @return
+	 */
+	private static int expWithMod(int base, int exp, int div) {
+		if ( exp == 1 ) {
+			return base%div;
+		}else {
+			// 정복분할 적용
+			int temp = expWithMod(base, exp/2, div);
+			int result = (temp*temp); 
+			if ( exp %2 == 1 ) {
+				result = (result%div) * (base%div);
+			}
+			return result%div;
+		}
+	}
+
+	/**
+	 * n! 를 div 로 나눈 나머지를 구한다.
+	 * 
+	 * DP 적용
+	 * 
+	 * @param n
+	 * @param div
+	 * @param dpFactorial
+	 * @return
+	 */
+	private static int factorialWithMod(int n, int div, int[] dpFactorial) {
+		if ( n == 0 || n == 1 ) {
+			return 1;
+		}else {
+			if ( dpFactorial[n] == 0 ) {
+				dpFactorial[n] = (n * factorialWithMod(n-1, div, dpFactorial))%div;
+			}
+			return dpFactorial[n];
+		}
+		
+	}
 	
 }
